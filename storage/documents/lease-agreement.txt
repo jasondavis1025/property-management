@@ -1,0 +1,8 @@
+OAKVIEW APARTMENTS — RESIDENTIAL LEASE (DEMO DOCUMENT)
+
+Tenant: Alex Jordan
+Unit: 204
+Monthly rent: $1,450.00
+Lease term: 12 months
+
+This is sample portal content for download testing. Replace with your signed PDF in production.

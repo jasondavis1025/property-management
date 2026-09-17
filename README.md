@@ -1,36 +1,105 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Oakview Resident Portal
 
-## Getting Started
+Full-stack resident portal built with **Next.js 16**, **React 19**, **PostgreSQL**, and **Drizzle ORM**.
 
-First, run the development server:
+Tenants can sign in to pay rent with **Stripe Checkout** (card or US bank debit), enable **auto-pay**, submit maintenance requests, download documents, message the office, read announcements, and update their profile.
+
+## Stack
+
+- Next.js App Router (React Server Components + Server Actions)
+- PostgreSQL (pgAdmin or any Postgres client)
+- Drizzle ORM + `drizzle-kit push` for schema
+- Session auth (HTTP-only cookie + signed JWT via `jose`)
+- Tailwind CSS 4
+
+## 1. PostgreSQL (pgAdmin)
+
+1. Open pgAdmin and create a database, e.g. `resident_portal`.
+2. Note your connection details (host, port, user, password).
+
+## 2. Environment
+
+Copy the example file and fill in your values:
+
+```bash
+cp .env.example .env.local
+```
+
+- `DATABASE_URL` — e.g. `postgresql://postgres:YOUR_PASSWORD@localhost:5432/resident_portal`
+- `SESSION_SECRET` — at least 32 random characters
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` / `STRIPE_SECRET_KEY` — [Stripe test keys](https://dashboard.stripe.com/test/apikeys)
+- `NEXT_PUBLIC_APP_URL` — e.g. `http://localhost:3000` (used for Checkout return URLs)
+- `STRIPE_WEBHOOK_SECRET` — from Stripe CLI or Dashboard (see below)
+- `CRON_SECRET` — optional; protects `/api/cron/charge-rent` in production
+
+## 3. Install & database
+
+```bash
+npm install
+npm run db:push
+npm run db:seed
+```
+
+## 4. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Demo tenant (after seed):**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Email: `alex.jordan@example.com`
+- Password: `resident123`
 
-## Learn More
+## Portal routes
 
-To learn more about Next.js, take a look at the following resources:
+| Path | Purpose |
+|------|---------|
+| `/portal` | Dashboard |
+| `/portal/payments` | Pay rent & history |
+| `/portal/maintenance` | Submit & track requests |
+| `/portal/documents` | Download files |
+| `/portal/messages` | Inbox & new threads |
+| `/portal/announcements` | Property news |
+| `/portal/profile` | Contact info & lease summary |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Stripe (local)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Add test keys to `.env.local` (see `.env.example`).
+2. Start the app: `npm run dev`.
+3. In another terminal, forward webhooks:
 
-## Deploy on Vercel
+   ```bash
+   stripe listen --forward-to localhost:3000/api/stripe/webhook
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. Copy the printed `whsec_…` into `STRIPE_WEBHOOK_SECRET` in `.env.local` and restart `npm run dev`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Pay rent:** `/portal/payments` → **Pay with Stripe** (Checkout). After payment, the invoice is marked paid via webhook (and a success-page sync fallback).
+
+**Auto-pay:** **Set up auto-pay** saves a payment method on your Stripe Customer. Run daily (on or after due dates):
+
+```bash
+npm run autopay:charge
+```
+
+Or schedule `POST /api/cron/charge-rent` with header `Authorization: Bearer YOUR_CRON_SECRET`.
+
+Test card: `4242 4242 4242 4242`, any future expiry, any CVC.
+
+## Production notes
+
+- **Payments:** Use live Stripe keys, HTTPS, and a Dashboard webhook pointing to `/api/stripe/webhook`.
+- **Documents:** Files live in `storage/documents/` on the same machine as the app (ideal for a small deployment). Back up that folder with your database. For serverless hosting later, use Cloudflare R2 or similar.
+- **Staff admin UI:** Not included yet; staff users exist for seeded message replies. A property-manager dashboard can be added on the same schema.
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Development server |
+| `npm run db:push` | Apply schema to Postgres |
+| `npm run db:seed` | Load demo property, tenant, invoices |
+| `npm run autopay:charge` | Charge due invoices for tenants with auto-pay enabled |

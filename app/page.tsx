@@ -1,68 +1,70 @@
-import Image from "next/image";
+import Link from "next/link";
+import { HomeHashScroll } from "@/components/home-hash-scroll";
+import { ScrollToIdLink } from "@/components/scroll-to-id-link";
 
-export default function Home() {
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gradient-to-b from-teal-950 via-teal-900 to-zinc-950 text-white">
+      <HomeHashScroll />
+      <header className="mx-auto flex max-w-6xl items-center justify-between px-4 py-6 sm:px-6">
+        <span className="text-lg font-semibold tracking-tight">Oakview Apartments</span>
+        <Link
+          href="/login"
+          className="rounded-lg bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur hover:bg-white/20"
+        >
+          Resident login
+        </Link>
+      </header>
+
+      <main className="mx-auto max-w-6xl px-4 pb-20 pt-10 sm:px-6 sm:pt-16">
+        <div className="max-w-2xl">
+          <p className="text-sm font-medium uppercase tracking-wide text-teal-200">
+            Resident portal
           </p>
+          <h1 className="mt-3 text-4xl font-semibold leading-tight sm:text-5xl">
+            Everything you need as a tenant — in one secure place.
+          </h1>
+          <p className="mt-4 text-lg text-teal-100/90">
+            Pay rent, submit maintenance requests, download documents, read
+            announcements, and message the office without phone tag or paper forms.
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <Link
+              href="/login"
+              className="rounded-lg bg-teal-400 px-5 py-3 text-sm font-semibold text-teal-950 hover:bg-teal-300"
+            >
+              Sign in to portal
+            </Link>
+            <ScrollToIdLink
+              id="features"
+              className="rounded-lg border border-white/20 px-5 py-3 text-sm font-medium hover:bg-white/5 md:hidden"
+            >
+              See features
+            </ScrollToIdLink>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        <section
+          id="features"
+          className="mt-16 scroll-mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
+          {[
+            ["Pay rent online", "View balances, pay by card or bank, and access receipts."],
+            ["Maintenance", "Submit requests and track status from submission to completion."],
+            ["Documents", "Lease, notices, and policies available 24/7."],
+            ["Messaging", "Secure inbox with your property management team."],
+            ["Announcements", "Pool closures, package notices, and community news."],
+            ["Profile", "Keep contact info up to date for emergencies and billing."],
+          ].map(([title, body]) => (
+            <article
+              key={title}
+              className="rounded-xl border border-white/10 bg-white/5 p-5 backdrop-blur"
+            >
+              <h2 className="font-semibold text-teal-100">{title}</h2>
+              <p className="mt-2 text-sm text-teal-50/80">{body}</p>
+            </article>
+          ))}
+        </section>
       </main>
     </div>
   );
